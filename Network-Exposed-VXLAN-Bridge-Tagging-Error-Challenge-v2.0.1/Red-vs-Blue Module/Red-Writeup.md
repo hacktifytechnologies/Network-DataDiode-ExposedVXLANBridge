@@ -1,4 +1,4 @@
-# VXLAN VLAN Hopping Validation Guide
+# Red Writeup - DataDiode-ExposedVXLANBridge
 
 This guide validates external access to an exposed VXLAN overlay, DHCP lease acquisition on the user VLAN, VLAN 30 interface creation, and access to the protected management service.
 
