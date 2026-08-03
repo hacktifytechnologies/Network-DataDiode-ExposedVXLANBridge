@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+D="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; . "$D/runtime/lab.env"
+ip -d link show "$BR" | grep -q 'vlan_filtering 1'
+ip -d link show "$VXLAN_PORT" | grep -Eq "vxlan id ${VXLAN_VNI}([[:space:]]|$)"
+bridge vlan show dev "$VXLAN_PORT" | grep -Eq "(^|[[:space:]])10[[:space:]].*PVID.*Egress Untagged"
+bridge vlan show dev "$VXLAN_PORT" | grep -Eq "(^|[[:space:]])30([[:space:]]|$)"
+curl -fsS "http://${EXT_IP}:8088/backup.conf" | grep -q 'VXLAN_VNI=200'
+ip netns exec "$WORK_NS" curl -fsS "http://${WORK_IP}:8080/network-note" | grep -q 'VLAN 30'
+ip netns exec "$ADMIN_NS" curl -fsS "http://${MGMT_IP}:8080/" | grep -q 'FLAG{linux_bridge_tagged_vlan_bypass}'
+echo VALIDATION:PASS

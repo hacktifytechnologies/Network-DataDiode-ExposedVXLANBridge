@@ -1,0 +1,14 @@
+id: Network-Exposed-VXLAN-Bridge-Tagging-Error-Setup-RedvsBlue
+name: Network-Exposed-VXLAN-Bridge-Tagging-Error-Setup-RedvsBlue
+description: Sets up the complete Red-vs-Blue challenge.
+tactic: execution
+technique_id: T1059
+technique_name: Command and Scripting Interpreter
+tag: Network
+service_availability_id: Network-Exposed-VXLAN-Bridge-Tagging-Error-Service-Availability
+executors:
+  - name: sh
+    platform: linux
+    command: 'echo "Setup Successful"'
+    payloads: []
+    parsers: []

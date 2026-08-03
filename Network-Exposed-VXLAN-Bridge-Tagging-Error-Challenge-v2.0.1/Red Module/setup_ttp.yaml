@@ -1,0 +1,13 @@
+id: Network-Exposed-VXLAN-Bridge-Tagging-Error-Setup-Red
+name: Network-Exposed-VXLAN-Bridge-Tagging-Error-Setup-Red
+description: Confirms Red module readiness.
+tactic: execution
+technique_id: T1059
+technique_name: Command and Scripting Interpreter
+tag: Network
+executors:
+  - name: sh
+    platform: linux
+    command: 'echo "Setup Successful"'
+    payloads: []
+    parsers: []

